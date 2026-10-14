@@ -1,0 +1,14 @@
+.forgot-password {
+  align-self: flex-end;
+  margin-top: -7px;
+  color: var(--forest);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration-color: rgb(29 78 62 / 35%);
+  text-underline-offset: 3px;
+}
+
+.forgot-password:focus-visible {
+  outline: 3px solid rgb(29 78 62 / 32%);
+  outline-offset: 3px;
+}

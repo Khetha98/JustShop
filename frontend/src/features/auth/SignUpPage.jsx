@@ -14,7 +14,7 @@ function SignUpPage() {
   return (
     <main className="signup-page">
       <section className="visual-panel" aria-label="JustShop store">
-        <a className="brand brand-on-image" href="#top" aria-label="JustShop home">
+        <a className="brand brand-on-image" href="/sign-up" aria-label="JustShop home">
           JustShop<span>.</span>
         </a>
         <div className="visual-copy">
@@ -27,10 +27,10 @@ function SignUpPage() {
 
       <section className="form-panel" id="top">
         <header className="form-header">
-          <a className="brand brand-on-light" href="#top" aria-label="JustShop home">
+          <a className="brand brand-on-light" href="/sign-up" aria-label="JustShop home">
             JustShop<span>.</span>
           </a>
-          <p className="sign-in-prompt">Already a member? <a href="#sign-in">Sign in</a></p>
+          <p className="sign-in-prompt">Already a member? <a href="/sign-in">Sign in</a></p>
         </header>
 
         <div className="form-content">
