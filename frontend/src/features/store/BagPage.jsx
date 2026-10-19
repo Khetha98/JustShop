@@ -61,7 +61,7 @@ function BagPage({ cartItems, setCartItems }) {
               <h2>Order summary</h2>
               <div><span>Subtotal</span><strong>{formatPrice(subtotal)}</strong></div>
               <p>Shipping and taxes calculated at checkout.</p>
-              <button className="checkout-button" type="button" disabled>Continue to checkout</button>
+              <a className="checkout-button" href="/checkout">Continue to checkout</a>
             </aside>
           </div>
         )}

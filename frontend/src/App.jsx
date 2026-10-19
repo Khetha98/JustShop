@@ -1,6 +1,7 @@
 import { useEffect, useState } from 'react'
 import HomePage from './features/store/HomePage.jsx'
 import BagPage from './features/store/BagPage.jsx'
+import CheckoutPage from './features/store/CheckoutPage.jsx'
 import SignInPage from './features/auth/SignInPage.jsx'
 import SignUpPage from './features/auth/SignUpPage.jsx'
 
@@ -8,6 +9,7 @@ function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
   const isHomePage = path === '/'
   const isBagPage = path === '/bag'
+  const isCheckoutPage = path === '/checkout'
   const isSignInPage = path === '/sign-in'
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -27,13 +29,16 @@ function App() {
       ? 'JustShop | Thoughtful goods for everyday'
       : isBagPage
         ? 'Your bag | JustShop'
-        : isSignInPage
-          ? 'Sign in | JustShop'
-          : 'Create your account | JustShop'
-  }, [isHomePage, isBagPage, isSignInPage])
+        : isCheckoutPage
+          ? 'Checkout | JustShop'
+          : isSignInPage
+            ? 'Sign in | JustShop'
+            : 'Create your account | JustShop'
+  }, [isHomePage, isBagPage, isCheckoutPage, isSignInPage])
 
   if (isHomePage) return <HomePage cartItems={cartItems} setCartItems={setCartItems} />
   if (isBagPage) return <BagPage cartItems={cartItems} setCartItems={setCartItems} />
+  if (isCheckoutPage) return <CheckoutPage cartItems={cartItems} />
   return isSignInPage ? <SignInPage /> : <SignUpPage />
 }
 
