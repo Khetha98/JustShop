@@ -1,53 +1,25 @@
 import { useState } from 'react'
+import StoreHeader from './StoreHeader.jsx'
+import { formatPrice, products } from './products.js'
 import './HomePage.css'
 
-const products = [
-  {
-    id: 'field-tote',
-    name: 'Field Day Tote',
-    detail: 'Heavy cotton canvas · Moss',
-    price: 'R38',
-    image: 'https://images.unsplash.com/photo-1544816155-12df9643f363?auto=format&fit=crop&w=1000&q=85',
-    imageAlt: 'Natural canvas tote bag with everyday essentials',
-    color: 'moss',
-  },
-  {
-    id: 'daily-notebook',
-    name: 'The Daily Notebook',
-    detail: 'Recycled paper · Soft cover',
-    price: 'R18',
-    image: 'https://images.unsplash.com/photo-1531346878377-a5be20888e57?auto=format&fit=crop&w=1000&q=85',
-    imageAlt: 'Open notebook and pen beside a keyboard',
-    color: 'oat',
-  },
-]
-
-function HomePage() {
-  const [bagCount, setBagCount] = useState(0)
+function HomePage({ cartItems, setCartItems }) {
   const [addedProduct, setAddedProduct] = useState('')
+  const bagCount = cartItems.reduce((count, item) => count + item.quantity, 0)
 
   function addToBag(productId) {
-    setBagCount((count) => count + 1)
+    setCartItems((items) => {
+      const existingItem = items.find((item) => item.id === productId)
+      return existingItem
+        ? items.map((item) => item.id === productId ? { ...item, quantity: item.quantity + 1 } : item)
+        : [...items, { id: productId, quantity: 1 }]
+    })
     setAddedProduct(productId)
   }
 
   return (
     <main className="storefront">
-      <div className="announcement-bar">A little more considered. A little less ordinary.</div>
-
-      <header className="store-header">
-        <a className="store-brand" href="/" aria-label="JustShop home">JustShop<span>.</span></a>
-        <nav className="store-nav" aria-label="Main navigation">
-          <a className="nav-current" href="#shop">Shop</a>
-          <a href="#story">Our story</a>
-        </nav>
-        <div className="store-actions">
-          <a className="account-link" href="/sign-in">Sign in</a>
-          <span className="bag-count" aria-live="polite" aria-label={`${bagCount} items in bag`}>
-            Bag <span>{bagCount}</span>
-          </span>
-        </div>
-      </header>
+      <StoreHeader bagCount={bagCount} />
 
       <section className="store-intro" id="story">
         <div className="intro-copy">
@@ -86,7 +58,7 @@ function HomePage() {
                     <p className="product-detail">{product.detail}</p>
                     <h3>{product.name}</h3>
                   </div>
-                  <span className="product-price">{product.price}</span>
+                  <span className="product-price">{formatPrice(product.price)}</span>
                 </div>
                 <button className="add-button" type="button" onClick={() => addToBag(product.id)}>
                   <span>{isAdded ? 'Added to bag' : 'Add to bag'}</span>

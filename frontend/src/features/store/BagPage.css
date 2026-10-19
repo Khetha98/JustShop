@@ -1,0 +1,257 @@
+.bag-page {
+  min-height: 100vh;
+  background: var(--paper);
+}
+
+.bag-content {
+  width: min(1060px, calc(100% - 44px));
+  min-height: calc(100vh - 176px);
+  margin: 0 auto;
+  padding: 52px 0 60px;
+  animation: store-arrive 550ms ease-out both;
+}
+
+.bag-heading {
+  padding-bottom: 24px;
+  border-bottom: 1px solid #dedfd6;
+}
+
+.bag-heading .store-eyebrow {
+  margin-bottom: 9px;
+  color: var(--tomato);
+}
+
+.bag-heading h1 {
+  margin: 0;
+  color: var(--forest);
+  font-family: var(--display);
+  font-size: 39px;
+  font-weight: 500;
+}
+
+.bag-heading h1 span {
+  color: #778078;
+  font-family: 'DM Sans', sans-serif;
+  font-size: 15px;
+  font-weight: 500;
+}
+
+.bag-layout {
+  display: grid;
+  grid-template-columns: minmax(0, 1.6fr) minmax(250px, 0.8fr);
+  align-items: start;
+  gap: 58px;
+  padding-top: 8px;
+}
+
+.bag-item {
+  display: grid;
+  grid-template-columns: 120px minmax(0, 1fr) auto;
+  align-items: start;
+  gap: 20px;
+  padding: 23px 0;
+  border-bottom: 1px solid #e5e4dc;
+}
+
+.bag-item > img {
+  display: block;
+  width: 120px;
+  aspect-ratio: 1;
+  object-fit: cover;
+  background: #e9ece3;
+}
+
+.bag-item-info > p {
+  margin: 2px 0 6px;
+  color: #758078;
+  font-size: 10px;
+}
+
+.bag-item-info h2 {
+  margin: 0;
+  color: var(--ink);
+  font-family: var(--display);
+  font-size: 21px;
+  font-weight: 500;
+}
+
+.bag-item-controls {
+  display: flex;
+  align-items: center;
+  gap: 17px;
+  margin-top: 17px;
+}
+
+.quantity-control {
+  display: inline-grid;
+  grid-template-columns: 32px 32px 32px;
+  height: 32px;
+  border: 1px solid #c9cec5;
+}
+
+.quantity-control button {
+  border: 0;
+  background: transparent;
+  color: var(--forest);
+  cursor: pointer;
+  font-size: 17px;
+}
+
+.quantity-control span {
+  display: grid;
+  place-items: center;
+  font-size: 11px;
+}
+
+.remove-item {
+  padding: 4px 0;
+  border: 0;
+  border-bottom: 1px solid #a9afa7;
+  background: transparent;
+  color: #657267;
+  cursor: pointer;
+  font-size: 10px;
+}
+
+.bag-item-price {
+  padding-top: 3px;
+  color: var(--forest);
+  font-size: 12px;
+  font-weight: 700;
+  white-space: nowrap;
+}
+
+.bag-continue {
+  display: inline-flex;
+  align-items: center;
+  gap: 9px;
+  margin-top: 21px;
+  color: var(--forest);
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+}
+
+.bag-summary {
+  padding: 21px;
+  background: #eef0e9;
+}
+
+.bag-summary h2 {
+  margin: 0 0 22px;
+  color: var(--forest);
+  font-family: var(--display);
+  font-size: 20px;
+  font-weight: 500;
+}
+
+.bag-summary > div {
+  display: flex;
+  justify-content: space-between;
+  gap: 15px;
+  padding: 15px 0;
+  border-top: 1px solid #d7dcd2;
+  color: #48534b;
+  font-size: 12px;
+}
+
+.bag-summary strong {
+  color: var(--forest);
+}
+
+.bag-summary > p {
+  margin: 0 0 18px;
+  color: #758078;
+  font-size: 10px;
+  line-height: 1.5;
+}
+
+.checkout-button {
+  width: 100%;
+  min-height: 43px;
+  border: 0;
+  background: var(--forest);
+  color: #fffdf5;
+  font-size: 11px;
+  font-weight: 700;
+}
+
+.checkout-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.bag-empty {
+  display: flex;
+  min-height: 270px;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.bag-empty p {
+  margin: 0;
+  color: var(--forest);
+  font-family: var(--display);
+  font-size: 25px;
+}
+
+.bag-empty .bag-continue {
+  margin-top: 16px;
+}
+
+.bag-content :focus-visible,
+.quantity-control button:focus-visible,
+.remove-item:focus-visible {
+  outline: 3px solid rgb(201 83 54 / 35%);
+  outline-offset: 3px;
+}
+
+@media (max-width: 700px) {
+  .bag-content {
+    width: calc(100% - 40px);
+    padding: 35px 0 42px;
+  }
+
+  .bag-heading h1 {
+    font-size: 34px;
+  }
+
+  .bag-layout {
+    grid-template-columns: 1fr;
+    gap: 30px;
+    padding-top: 0;
+  }
+
+  .bag-item {
+    grid-template-columns: 88px minmax(0, 1fr) auto;
+    gap: 12px;
+    padding: 18px 0;
+  }
+
+  .bag-item > img {
+    width: 88px;
+  }
+
+  .bag-item-info h2 {
+    font-size: 18px;
+  }
+
+  .bag-item-info > p {
+    font-size: 9px;
+  }
+
+  .bag-item-controls {
+    gap: 12px;
+    margin-top: 13px;
+  }
+
+  .quantity-control {
+    grid-template-columns: 28px 26px 28px;
+  }
+
+  .bag-item-price {
+    font-size: 11px;
+  }
+}
