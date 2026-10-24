@@ -31,3 +31,5 @@ build/
 
 ### VS Code ###
 .vscode/
+logs/subserve-sync.log
+./logs
