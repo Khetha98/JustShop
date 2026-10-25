@@ -10,10 +10,8 @@ import co.za.backend.repository.CartRepository;
 import co.za.backend.repository.ProductRepository;
 import co.za.backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
-import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
-import java.util.UUID;
 
 @Service
 public class CartService {

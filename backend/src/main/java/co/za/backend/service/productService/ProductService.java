@@ -28,7 +28,7 @@ public class ProductService {
                 .collect(Collectors.toList());
     }
 
-    public ProductResponse getProductById(UUID id) {
+    public ProductResponse getProductById(Long id) {
         Product product = productRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Product not found"));
         return mapToResponse(product);

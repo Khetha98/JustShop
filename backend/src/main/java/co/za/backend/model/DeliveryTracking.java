@@ -17,8 +17,8 @@ import java.util.UUID;
 public class DeliveryTracking {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
-    private UUID id;
-    private UUID orderId;
+    private Long id;
+    private Long orderId;
     private String courierName;
     private String trackingNumber;
     @Enumerated(EnumType.STRING)

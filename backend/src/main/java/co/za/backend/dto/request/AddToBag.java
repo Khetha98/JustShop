@@ -12,6 +12,6 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class AddToBag {
-    private UUID productId;
+    private Long productId;
     private int quantity;
 }

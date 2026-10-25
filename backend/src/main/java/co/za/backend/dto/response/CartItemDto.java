@@ -13,7 +13,7 @@ import java.util.UUID;
 @AllArgsConstructor
 @NoArgsConstructor
 public class CartItemDto {
-    private UUID productId;
+    private Long productId;
     private String productName;
     private int quantity;
     private BigDecimal priceAtTime;

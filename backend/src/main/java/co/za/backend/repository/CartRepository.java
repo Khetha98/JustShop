@@ -11,7 +11,7 @@ import java.util.UUID;
 import static co.za.backend.enums.UserStatus.ACTIVE;
 
 @Repository
-public interface CartRepository extends JpaRepository<Cart, UUID> {
+public interface CartRepository extends JpaRepository<Cart, Long> {
 
-    Optional<Cart> findByUserIdAndStatus(UUID userId, CartStatus CartStatus);
+    Optional<Cart> findByUserIdAndStatus(Long userId, CartStatus CartStatus);
 }

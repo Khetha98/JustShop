@@ -9,15 +9,14 @@ import lombok.Setter;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
 @AllArgsConstructor
 @NoArgsConstructor
 public class OrderResponse {
-    private UUID id;
-    private UUID userId;
+    private Long id;
+    private Long userId;
     private BigDecimal totalAmount;
     private PaymentStatus paymentStatus;
     private OrderStatus orderStatus;
