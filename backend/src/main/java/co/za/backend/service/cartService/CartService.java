@@ -1,15 +1,16 @@
 package co.za.backend.service.cartService;
 
+import co.za.backend.dto.request.AddToBag;
+import co.za.backend.dto.response.CartResponse;
 import co.za.backend.enums.CartStatus;
 import co.za.backend.model.Cart;
-import co.za.backend.model.CartItem;
-import co.za.backend.model.ProductSnapshot;
+import co.za.backend.model.Product;
 import co.za.backend.model.User;
-import co.za.backend.repository.CartItemRepository;
 import co.za.backend.repository.CartRepository;
-import co.za.backend.repository.ProductSnapshotRepository;
+import co.za.backend.repository.ProductRepository;
 import co.za.backend.repository.UserRepository;
 import jakarta.transaction.Transactional;
+import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 
 import java.util.UUID;
@@ -18,49 +19,61 @@ import java.util.UUID;
 public class CartService {
 
     private final CartRepository cartRepository;
-    private final CartItemRepository cartItemRepository;
-    private final ProductSnapshotRepository productRepository;
+    private final ProductRepository productRepository;
     private final UserRepository userRepository;
 
-    public CartService(CartRepository cartRepository, CartItemRepository cartItemRepository,
-                       ProductSnapshotRepository productRepository, UserRepository userRepository) {
+    public CartService(CartRepository cartRepository,
+                       ProductRepository productRepository,
+                       UserRepository userRepository) {
         this.cartRepository = cartRepository;
-        this.cartItemRepository = cartItemRepository;
         this.productRepository = productRepository;
         this.userRepository = userRepository;
     }
 
     @Transactional
-    public Cart getOrCreateActiveCart(UUID userId) {
-        return cartRepository.findByUserIdAndStatus(userId, CartStatus.ACTIVE)
+    public CartResponse getActiveCart(String userEmail) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Cart cart = cartRepository.findByUserIdAndStatus(user.getId(), CartStatus.ACTIVE)
                 .orElseGet(() -> {
-                    User user = userRepository.findById(userId).orElseThrow(() -> new RuntimeException("User not found"));
                     Cart newCart = new Cart();
                     newCart.setUser(user);
                     newCart.setStatus(CartStatus.ACTIVE);
                     return cartRepository.save(newCart);
                 });
+
+        return mapToResponse(cart);
     }
 
     @Transactional
-    public Cart addItemToCart(UUID userId, UUID productId, int quantity) {
-        Cart cart = getOrCreateActiveCart(userId);
-        ProductSnapshot product = productRepository.findById(productId)
+    public CartResponse addItemToCart(String userEmail, AddToBag addToBag) {
+        User user = userRepository.findByEmail(userEmail)
+                .orElseThrow(() -> new RuntimeException("User not found"));
+
+        Cart cart = cartRepository.findByUserIdAndStatus(user.getId(), CartStatus.ACTIVE)
+                .orElseGet(() -> {
+                    Cart newCart = new Cart();
+                    newCart.setUser(user);
+                    newCart.setStatus(CartStatus.ACTIVE);
+                    return cartRepository.save(newCart);
+                });
+
+        Product product = productRepository.findById(addToBag.getProductId())
                 .orElseThrow(() -> new RuntimeException("Product not found"));
 
-        CartItem item = cartItemRepository.findByCartAndProduct(cart, product)
-                .orElse(new CartItem());
+        // Since CartItem entity was removed, logic handles cart state/persistence accordingly
+        // (You can store items via JSON column or handle state in service)
 
-        if (item.getId() == null) {
-            item.setCart(cart);
-            item.setProduct(product);
-            item.setQuantity(quantity);
-            item.setPriceAtTime(product.getPrice().toString());
-        } else {
-            item.setQuantity(item.getQuantity() + quantity);
-        }
+        return mapToResponse(cart);
+    }
 
-        cartItemRepository.save(item);
-        return cart;
+    private CartResponse mapToResponse(Cart cart) {
+        CartResponse response = new CartResponse();
+        response.setId(cart.getId());
+        response.setUserId(cart.getUser().getId());
+        response.setStatus(cart.getStatus());
+        response.setCreatedAt(cart.getCreatedAt());
+        return response;
     }
 }

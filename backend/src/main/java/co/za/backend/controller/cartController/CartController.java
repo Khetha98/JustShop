@@ -1,11 +1,11 @@
 package co.za.backend.controller.cartController;
 
-import co.za.backend.model.Cart;
+import co.za.backend.dto.request.AddToBag;
+import co.za.backend.dto.response.CartResponse;
 import co.za.backend.service.cartService.CartService;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.*;
-
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/cart")
@@ -17,16 +17,17 @@ public class CartController {
         this.cartService = cartService;
     }
 
-    @GetMapping("/{userId}")
-    public ResponseEntity<Cart> getCart(@PathVariable UUID userId) {
-        return ResponseEntity.ok(cartService.getOrCreateActiveCart(userId));
+    @GetMapping
+    public ResponseEntity<CartResponse> getCart(Authentication authentication) {
+        String userEmail = authentication.getName();
+        return ResponseEntity.ok(cartService.getActiveCart(userEmail));
     }
 
-    @PostMapping("/{userId}/items")
-    public ResponseEntity<Cart> addItem(
-            @PathVariable UUID userId,
-            @RequestParam UUID productId,
-            @RequestParam int quantity) {
-        return ResponseEntity.ok(cartService.addItemToCart(userId, productId, quantity));
+    @PostMapping("/items")
+    public ResponseEntity<CartResponse> addItem(
+            Authentication authentication,
+            @RequestBody AddToBag addToBag) {
+        String userEmail = authentication.getName();
+        return ResponseEntity.ok(cartService.addItemToCart(userEmail, addToBag));
     }
 }

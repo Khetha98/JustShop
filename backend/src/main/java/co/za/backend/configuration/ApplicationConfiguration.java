@@ -23,10 +23,8 @@ public class ApplicationConfiguration {
     @Bean
     public UserDetailsService userDetailsService() {
         return username -> {
-            System.out.println("Attempting to load user by email: [" + username + "]");
             return userRepository.findByEmail(username)
                     .orElseThrow(() -> {
-                        System.out.println("User NOT found in database: " + username);
                         return new UsernameNotFoundException("User not found: " + username);
                     });
         };
@@ -43,8 +41,6 @@ public class ApplicationConfiguration {
             PasswordEncoder passwordEncoder) {
         DaoAuthenticationProvider authProvider = new DaoAuthenticationProvider(userDetailsService);
         authProvider.setPasswordEncoder(passwordEncoder());
-        System.out.println(passwordEncoder);
-        System.out.println(passwordEncoder());
         return authProvider;
     }
 

@@ -21,15 +21,20 @@ public class Order {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     private UUID id;
+
     private UUID userId;
-    private UUID odooOrderId;
+
     private BigDecimal totalAmount;
+
     @Enumerated(EnumType.STRING)
     private PaymentStatus paymentStatus;
+
     @Enumerated(EnumType.STRING)
     private OrderStatus orderStatus;
+
     @Column(columnDefinition = "TEXT")
     private String deliveryAddress;
+
     @CreationTimestamp
     private LocalDateTime createdAt;
 }

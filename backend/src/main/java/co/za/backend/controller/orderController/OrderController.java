@@ -1,7 +1,9 @@
 package co.za.backend.controller.orderController;
 
 import co.za.backend.dto.request.CheckoutDto;
-import co.za.backend.model.Order;
+import co.za.backend.dto.request.AddToBag;
+import co.za.backend.dto.request.CheckoutPayload;
+import co.za.backend.dto.response.OrderResponse;
 import co.za.backend.service.orderService.OrderService;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -19,23 +21,20 @@ public class OrderController {
         this.orderService = orderService;
     }
 
-    // 1. Checkout endpoint using JSON Request Body (CheckoutDto)
     @PostMapping("/checkout")
-    public ResponseEntity<Order> checkout(
+    public ResponseEntity<OrderResponse> checkout(
             Authentication authentication,
-            @RequestBody CheckoutDto checkoutDto) {
+            @RequestBody CheckoutPayload payload) { // Custom payload containing CheckoutDto and items list
 
-        // authentication.getName() automatically retrieves the email from the JWT subject (sub)
         String userEmail = authentication.getName();
-        Order order = orderService.createOrderFromCart(userEmail, checkoutDto);
-        return ResponseEntity.ok(order);
+        OrderResponse orderResponse = orderService.createOrder(userEmail, payload.getCheckoutDto(), payload.getItems());
+        return ResponseEntity.ok(orderResponse);
     }
 
-    // 2. Retrieval of orders for the logged-in user
     @GetMapping
-    public ResponseEntity<List<Order>> getUserOrders(Authentication authentication) {
+    public ResponseEntity<List<OrderResponse>> getUserOrders(Authentication authentication) {
         String userEmail = authentication.getName();
-        List<Order> orders = orderService.getOrdersByUserEmail(userEmail);
+        List<OrderResponse> orders = orderService.getOrdersByUserEmail(userEmail);
         return ResponseEntity.ok(orders);
     }
 }
