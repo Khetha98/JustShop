@@ -1,14 +1,41 @@
 import { useState } from 'react'
+import { api, saveAuthToken } from '../../api/client.js'
 import './SignUpPage.css'
 
 function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [submitted, setSubmitted] = useState(false)
   const [fullName, setFullName] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const returnTo = new URLSearchParams(window.location.search).get('returnTo')
+  const signInHref = returnTo ? `/sign-in?returnTo=${encodeURIComponent(returnTo)}` : '/sign-in'
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    setSubmitted(true)
+    const formData = new FormData(event.currentTarget)
+    setIsSubmitting(true)
+    setError('')
+
+    try {
+      const credentials = {
+        fullName: formData.get('name'),
+        email: formData.get('email'),
+        password: formData.get('password'),
+      }
+      await api.register(credentials)
+      const loginResponse = await api.login(credentials)
+      saveAuthToken(loginResponse.token)
+      setFullName(credentials.fullName)
+      setSubmitted(true)
+      if (returnTo?.startsWith('/') && !returnTo.startsWith('//')) {
+        window.location.assign(returnTo)
+      }
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -30,7 +57,7 @@ function SignUpPage() {
           <a className="brand brand-on-light" href="/sign-up" aria-label="JustShop home">
             JustShop<span>.</span>
           </a>
-          <p className="sign-in-prompt">Already a member? <a href="/sign-in">Sign in</a></p>
+          <p className="sign-in-prompt">Already a member? <a href={signInHref}>Sign in</a></p>
         </header>
 
         <div className="form-content">
@@ -48,6 +75,7 @@ function SignUpPage() {
             </div>
           ) : (
             <form className="signup-form" onSubmit={handleSubmit}>
+              {error && <p className="form-error" role="alert">{error}</p>}
               <label htmlFor="full-name">Full name</label>
               <input
                 id="full-name"
@@ -56,7 +84,6 @@ function SignUpPage() {
                 autoComplete="name"
                 placeholder="Your name"
                 required
-                onChange={(event) => setFullName(event.target.value)}
               />
 
               <label htmlFor="email">Email address</label>
@@ -96,8 +123,8 @@ function SignUpPage() {
                 <span>I agree to the <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.</span>
               </label>
 
-              <button className="create-account-button" type="submit">
-                Create account <span aria-hidden="true">→</span>
+              <button className="create-account-button" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Creating account…' : 'Create account'} <span aria-hidden="true">→</span>
               </button>
             </form>
           )}

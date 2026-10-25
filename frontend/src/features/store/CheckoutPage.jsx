@@ -1,20 +1,56 @@
 import { useState } from 'react'
 import StoreHeader from './StoreHeader.jsx'
-import { formatPrice, products } from './products.js'
+import { formatPrice } from './products.js'
+import { api, getAuthToken } from '../../api/client.js'
 import './CheckoutPage.css'
 
-function CheckoutPage({ cartItems }) {
-  const [submittedName, setSubmittedName] = useState('')
+function CheckoutPage({ cartItems, setCartItems, products }) {
+  const [order, setOrder] = useState(null)
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const isSignedIn = Boolean(getAuthToken())
   const checkoutItems = cartItems
-    .map((item) => ({ ...item, product: products.find((product) => product.id === item.id) }))
+    .map((item) => ({ ...item, product: products.find((product) => String(product.id) === String(item.id)) }))
     .filter((item) => item.product)
   const itemCount = checkoutItems.reduce((count, item) => count + item.quantity, 0)
   const subtotal = checkoutItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
     const formData = new FormData(event.currentTarget)
-    setSubmittedName(formData.get('firstName'))
+    setIsSubmitting(true)
+    setError('')
+
+    try {
+      if (checkoutItems.some(({ product }) => !Number.isSafeInteger(Number(product.id)))) {
+        throw new Error('Your bag contains sample products that are not in the backend catalog.')
+      }
+
+      const response = await api.checkout({
+        checkoutDto: {
+          email: formData.get('email'),
+          phone: formData.get('phone'),
+          firstName: formData.get('firstName'),
+          lastName: formData.get('lastName'),
+          streetAddress: formData.get('address'),
+          apartment: formData.get('addressExtra'),
+          suburb: formData.get('suburb'),
+          city: formData.get('city'),
+          province: formData.get('province'),
+          postalCode: formData.get('postalCode'),
+        },
+        items: checkoutItems.map(({ product, quantity }) => ({
+          productId: Number(product.id),
+          quantity,
+        })),
+      })
+      setOrder(response)
+      setCartItems([])
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
@@ -32,17 +68,23 @@ function CheckoutPage({ cartItems }) {
             <p>Your bag is empty.</p>
             <a className="checkout-submit" href="/#shop">Explore the collection</a>
           </div>
-        ) : submittedName ? (
+        ) : order ? (
           <section className="checkout-confirmation" role="status" aria-live="polite">
             <span className="confirmation-mark" aria-hidden="true">✓</span>
-            <p className="store-eyebrow">CHECKOUT PREVIEW</p>
-            <h2>Thanks, {submittedName}.</h2>
-            <p>Your delivery details are ready. This demo does not send an order or process a payment, and your bag is saved.</p>
-            <a className="checkout-submit" href="/bag">Return to your bag</a>
+            <p className="store-eyebrow">ORDER RECEIVED</p>
+            <h2>Thanks, your order is in.</h2>
+            <p>Order #{order.id} was created with status {order.orderStatus}. Payment has not been processed.</p>
+            <a className="checkout-submit" href="/">Continue shopping</a>
+          </section>
+        ) : !isSignedIn ? (
+          <section className="checkout-empty">
+            <p>Sign in to place your order.</p>
+            <a className="checkout-submit" href="/sign-in?returnTo=%2Fcheckout">Sign in to continue</a>
           </section>
         ) : (
           <div className="checkout-layout">
             <form className="delivery-form" onSubmit={handleSubmit}>
+              {error && <p className="checkout-error" role="alert">{error}</p>}
               <fieldset>
                 <legend>Contact details</legend>
                 <div className="checkout-field-grid">
@@ -110,7 +152,9 @@ function CheckoutPage({ cartItems }) {
                 <strong>Payment</strong>
                 <p>Payment is not available in this preview. No card details will be requested.</p>
               </div>
-              <button className="checkout-submit" type="submit">Review checkout <span aria-hidden="true">→</span></button>
+              <button className="checkout-submit" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Placing order…' : 'Place order'} <span aria-hidden="true">→</span>
+              </button>
             </form>
 
             <aside className="checkout-summary" aria-label="Order summary">

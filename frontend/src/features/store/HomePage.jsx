@@ -1,17 +1,17 @@
 import { useState } from 'react'
 import StoreHeader from './StoreHeader.jsx'
-import { formatPrice, products } from './products.js'
+import { formatPrice } from './products.js'
 import './HomePage.css'
 
-function HomePage({ cartItems, setCartItems }) {
+function HomePage({ cartItems, setCartItems, products, catalogError }) {
   const [addedProduct, setAddedProduct] = useState('')
   const bagCount = cartItems.reduce((count, item) => count + item.quantity, 0)
 
   function addToBag(productId) {
     setCartItems((items) => {
-      const existingItem = items.find((item) => item.id === productId)
+      const existingItem = items.find((item) => String(item.id) === String(productId))
       return existingItem
-        ? items.map((item) => item.id === productId ? { ...item, quantity: item.quantity + 1 } : item)
+        ? items.map((item) => String(item.id) === String(productId) ? { ...item, quantity: item.quantity + 1 } : item)
         : [...items, { id: productId, quantity: 1 }]
     })
     setAddedProduct(productId)
@@ -43,6 +43,8 @@ function HomePage({ cartItems, setCartItems }) {
           <p className="collection-note">Two keepers for your everyday.</p>
         </div>
 
+        {catalogError && <p className="catalog-warning" role="status">{catalogError} Showing sample products for now.</p>}
+
         <div className="product-grid">
           {products.map((product, index) => {
             const isAdded = addedProduct === product.id
@@ -50,7 +52,7 @@ function HomePage({ cartItems, setCartItems }) {
             return (
               <article className={`product product-${product.color}`} key={product.id}>
                 <div className="product-image-wrap">
-                  <img className="product-image" src={product.image} alt={product.imageAlt} />
+                  {product.image && <img className="product-image" src={product.image} alt={product.imageAlt} />}
                   <span className="product-number">0{index + 1}</span>
                 </div>
                 <div className="product-info">
@@ -68,6 +70,7 @@ function HomePage({ cartItems, setCartItems }) {
             )
           })}
         </div>
+        {products.length === 0 && <p className="catalog-warning">There are no products available right now.</p>}
         <p className="bag-feedback" role="status">
           {addedProduct ? `${products.find((product) => product.id === addedProduct)?.name} is in your bag.` : ''}
         </p>

@@ -1,21 +1,43 @@
 import { useState } from 'react'
+import { api, saveAuthToken } from '../../api/client.js'
 import './SignUpPage.css'
 import './SignInPage.css'
 
 function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
   const [submitted, setSubmitted] = useState(false)
-  const [email, setEmail] = useState('')
+  const [isSubmitting, setIsSubmitting] = useState(false)
+  const [error, setError] = useState('')
+  const returnTo = new URLSearchParams(window.location.search).get('returnTo')
+  const signUpHref = returnTo ? `/sign-up?returnTo=${encodeURIComponent(returnTo)}` : '/sign-up'
 
-  function handleSubmit(event) {
+  async function handleSubmit(event) {
     event.preventDefault()
-    setSubmitted(true)
+    const formData = new FormData(event.currentTarget)
+    setIsSubmitting(true)
+    setError('')
+
+    try {
+      const response = await api.login({
+        email: formData.get('email'),
+        password: formData.get('password'),
+      })
+      saveAuthToken(response.token)
+      setSubmitted(true)
+      if (returnTo?.startsWith('/') && !returnTo.startsWith('//')) {
+        window.location.assign(returnTo)
+      }
+    } catch (requestError) {
+      setError(requestError.message)
+    } finally {
+      setIsSubmitting(false)
+    }
   }
 
   return (
     <main className="signup-page">
       <section className="visual-panel" aria-label="JustShop store">
-        <a className="brand brand-on-image" href="/sign-up" aria-label="JustShop home">
+        <a className="brand brand-on-image" href={signUpHref} aria-label="JustShop home">
           JustShop<span>.</span>
         </a>
         <div className="visual-copy">
@@ -28,10 +50,10 @@ function SignInPage() {
 
       <section className="form-panel" id="top">
         <header className="form-header">
-          <a className="brand brand-on-light" href="/sign-up" aria-label="JustShop home">
+          <a className="brand brand-on-light" href={signUpHref} aria-label="JustShop home">
             JustShop<span>.</span>
           </a>
-          <p className="sign-in-prompt">New to JustShop? <a href="/sign-up">Create account</a></p>
+          <p className="sign-in-prompt">New to JustShop? <a href={signUpHref}>Create account</a></p>
         </header>
 
         <div className="form-content">
@@ -44,11 +66,12 @@ function SignInPage() {
               <span className="success-mark" aria-hidden="true">✓</span>
               <div>
                 <h2>Welcome back.</h2>
-                <p>You're signed in as {email}.</p>
+                <p>Your JustShop account is ready.</p>
               </div>
             </div>
           ) : (
             <form className="signup-form" onSubmit={handleSubmit}>
+              {error && <p className="form-error" role="alert">{error}</p>}
               <label htmlFor="email">Email address</label>
               <input
                 id="email"
@@ -57,7 +80,6 @@ function SignInPage() {
                 autoComplete="email"
                 placeholder="you@example.com"
                 required
-                onChange={(event) => setEmail(event.target.value)}
               />
 
               <label htmlFor="password">Password</label>
@@ -82,8 +104,8 @@ function SignInPage() {
 
               <a className="forgot-password" href="#forgot-password">Forgot password?</a>
 
-              <button className="create-account-button" type="submit">
-                Sign in <span aria-hidden="true">→</span>
+              <button className="create-account-button" type="submit" disabled={isSubmitting}>
+                {isSubmitting ? 'Signing in…' : 'Sign in'} <span aria-hidden="true">→</span>
               </button>
             </form>
           )}

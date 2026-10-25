@@ -149,6 +149,10 @@
   font-size: 11px;
 }
 
+.catalog-warning {
+  margin: 0 0 18px;
+}
+
 .product-grid {
   display: grid;
   grid-template-columns: repeat(2, minmax(0, 1fr));

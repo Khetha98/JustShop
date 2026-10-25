@@ -1,22 +1,22 @@
 import StoreHeader from './StoreHeader.jsx'
-import { formatPrice, products } from './products.js'
+import { formatPrice } from './products.js'
 import './BagPage.css'
 
-function BagPage({ cartItems, setCartItems }) {
+function BagPage({ cartItems, setCartItems, products }) {
   const bagProducts = cartItems
-    .map((item) => ({ ...item, product: products.find((product) => product.id === item.id) }))
+    .map((item) => ({ ...item, product: products.find((product) => String(product.id) === String(item.id)) }))
     .filter((item) => item.product)
   const itemCount = bagProducts.reduce((count, item) => count + item.quantity, 0)
   const subtotal = bagProducts.reduce((total, item) => total + item.product.price * item.quantity, 0)
 
   function updateQuantity(productId, change) {
     setCartItems((items) => items
-      .map((item) => item.id === productId ? { ...item, quantity: item.quantity + change } : item)
+      .map((item) => String(item.id) === String(productId) ? { ...item, quantity: item.quantity + change } : item)
       .filter((item) => item.quantity > 0))
   }
 
   function removeProduct(productId) {
-    setCartItems((items) => items.filter((item) => item.id !== productId))
+    setCartItems((items) => items.filter((item) => String(item.id) !== String(productId)))
   }
 
   return (

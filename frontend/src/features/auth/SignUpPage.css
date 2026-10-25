@@ -270,6 +270,26 @@
   background: #ae402d;
 }
 
+.create-account-button:disabled {
+  cursor: wait;
+  opacity: 0.7;
+}
+
+.form-error,
+.checkout-error,
+.catalog-warning {
+  padding: 11px 13px;
+  border-left: 3px solid var(--tomato);
+  background: #f7ebe6;
+  color: #7a3024;
+  font-size: 12px;
+  line-height: 1.5;
+}
+
+.form-error {
+  margin: 0 0 18px;
+}
+
 .create-account-button span {
   font-size: 20px;
   font-weight: 400;
