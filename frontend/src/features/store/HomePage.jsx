@@ -3,7 +3,7 @@ import StoreHeader from './StoreHeader.jsx'
 import { formatPrice } from './products.js'
 import './HomePage.css'
 
-function HomePage({ cartItems, setCartItems, products, catalogError }) {
+function HomePage({ cartItems, setCartItems, products, isLoadingProducts, catalogError }) {
   const [addedProduct, setAddedProduct] = useState('')
   const bagCount = cartItems.reduce((count, item) => count + item.quantity, 0)
 
@@ -43,7 +43,8 @@ function HomePage({ cartItems, setCartItems, products, catalogError }) {
           <p className="collection-note">Two keepers for your everyday.</p>
         </div>
 
-        {catalogError && <p className="catalog-warning" role="status">{catalogError} Showing sample products for now.</p>}
+        {isLoadingProducts && <p className="catalog-warning" role="status">Loading products…</p>}
+        {catalogError && <p className="catalog-warning" role="alert">Could not load products: {catalogError}</p>}
 
         <div className="product-grid">
           {products.map((product, index) => {
@@ -70,7 +71,9 @@ function HomePage({ cartItems, setCartItems, products, catalogError }) {
             )
           })}
         </div>
-        {products.length === 0 && <p className="catalog-warning">There are no products available right now.</p>}
+        {!isLoadingProducts && !catalogError && products.length === 0 && (
+          <p className="catalog-warning">There are no products available right now.</p>
+        )}
         <p className="bag-feedback" role="status">
           {addedProduct ? `${products.find((product) => product.id === addedProduct)?.name} is in your bag.` : ''}
         </p>
