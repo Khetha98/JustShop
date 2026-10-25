@@ -77,7 +77,15 @@ function App() {
 
   if (isHomePage) return <HomePage cartItems={cartItems} setCartItems={setCartItems} products={products} isLoadingProducts={isLoadingProducts} catalogError={catalogError} />
   if (isBagPage) return <BagPage cartItems={cartItems} setCartItems={setCartItems} products={products} />
-  if (isCheckoutPage) return <CheckoutPage cartItems={cartItems} setCartItems={setCartItems} products={products} />
+  if (isCheckoutPage) return (
+    <CheckoutPage
+      cartItems={cartItems}
+      setCartItems={setCartItems}
+      products={products}
+      isLoadingProducts={isLoadingProducts}
+      catalogError={catalogError}
+    />
+  )
   return isSignInPage ? <SignInPage /> : <SignUpPage />
 }
 
