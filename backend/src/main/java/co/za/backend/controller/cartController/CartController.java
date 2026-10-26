@@ -27,7 +27,9 @@ public class CartController {
     public ResponseEntity<CartResponse> addItem(
             Authentication authentication,
             @RequestBody AddToBag addToBag) {
+        System.out.println("At the cart item addition");
         String userEmail = authentication.getName();
+        System.out.println("Email of the user sending request: "+userEmail);
         return ResponseEntity.ok(cartService.addItemToCart(userEmail, addToBag));
     }
 }
