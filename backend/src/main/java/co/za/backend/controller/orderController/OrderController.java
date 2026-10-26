@@ -1,7 +1,5 @@
 package co.za.backend.controller.orderController;
 
-import co.za.backend.dto.request.CheckoutDto;
-import co.za.backend.dto.request.AddToBag;
 import co.za.backend.dto.request.CheckoutPayload;
 import co.za.backend.dto.response.OrderResponse;
 import co.za.backend.service.orderService.OrderService;
@@ -24,7 +22,7 @@ public class OrderController {
     @PostMapping("/checkout")
     public ResponseEntity<OrderResponse> checkout(
             Authentication authentication,
-            @RequestBody CheckoutPayload payload) { // Custom payload containing CheckoutDto and items list
+            @RequestBody CheckoutPayload payload) {
 
         String userEmail = authentication.getName();
         OrderResponse orderResponse = orderService.createOrder(userEmail, payload.getCheckoutDto(), payload.getItems());

@@ -10,6 +10,7 @@ import org.hibernate.annotations.CreationTimestamp;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Entity
 @Getter
@@ -18,7 +19,7 @@ import java.time.LocalDateTime;
 @Table(name = "orders")
 public class Order {
     @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
 
     private Long userId;
@@ -33,6 +34,9 @@ public class Order {
 
     @Column(columnDefinition = "TEXT")
     private String deliveryAddress;
+
+    @OneToMany(mappedBy = "order", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<OrderItem> items; // Links Order to its OrderItems
 
     @CreationTimestamp
     private LocalDateTime createdAt;

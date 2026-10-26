@@ -11,4 +11,6 @@ public class LoginResponse {
     private String token;
     private long expiresIn;
     private UserRole role;
+    private String fullName;
+    private String email;
 }

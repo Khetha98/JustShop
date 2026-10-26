@@ -3,15 +3,15 @@ package co.za.backend.service.orderService;
 import co.za.backend.dto.request.CheckoutDto;
 import co.za.backend.dto.request.AddToBag;
 import co.za.backend.dto.response.OrderResponse;
+import co.za.backend.enums.CartStatus;
 import co.za.backend.enums.OrderStatus;
 import co.za.backend.enums.PaymentStatus;
-import co.za.backend.model.Order;
-import co.za.backend.model.Product;
-import co.za.backend.model.User;
-import co.za.backend.repository.OrderRepository;
-import co.za.backend.repository.ProductRepository;
-import co.za.backend.repository.UserRepository;
+import co.za.backend.model.*;
+import co.za.backend.repository.*;
 import jakarta.transaction.Transactional;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.mail.SimpleMailMessage;
+import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
@@ -22,13 +22,24 @@ import java.util.stream.Collectors;
 public class OrderService {
 
     private final OrderRepository orderRepository;
+    private final OrderItemRepository orderItemRepository;
     private final UserRepository userRepository;
     private final ProductRepository productRepository;
+    private final CartRepository cartRepository;
+    private final CartItemRepository cartItemRepository;
 
-    public OrderService(OrderRepository orderRepository, UserRepository userRepository, ProductRepository productRepository) {
+    @Autowired
+    private JavaMailSender mailSender;
+
+    public OrderService(OrderRepository orderRepository, OrderItemRepository orderItemRepository,
+                        UserRepository userRepository, ProductRepository productRepository,
+                        CartRepository cartRepository, CartItemRepository cartItemRepository) {
         this.orderRepository = orderRepository;
+        this.orderItemRepository = orderItemRepository;
         this.userRepository = userRepository;
         this.productRepository = productRepository;
+        this.cartRepository = cartRepository;
+        this.cartItemRepository = cartItemRepository;
     }
 
     @Transactional
@@ -57,16 +68,33 @@ public class OrderService {
         order.setDeliveryAddress(formattedAddress);
 
         BigDecimal totalAmount = BigDecimal.ZERO;
+        Order savedOrder = orderRepository.save(order);
 
         for (AddToBag item : bagItems) {
             Product product = productRepository.findById(item.getProductId())
                     .orElseThrow(() -> new RuntimeException("Product not found: " + item.getProductId()));
 
+            OrderItem orderItem = new OrderItem();
+            orderItem.setOrder(savedOrder);
+            orderItem.setProduct(product);
+            orderItem.setQuantity(item.getQuantity());
+            orderItem.setPriceAtTimeOfPurchase(product.getPrice());
+            orderItemRepository.save(orderItem);
+
             totalAmount = totalAmount.add(product.getPrice().multiply(BigDecimal.valueOf(item.getQuantity())));
         }
 
-        order.setTotalAmount(totalAmount);
-        Order savedOrder = orderRepository.save(order);
+        savedOrder.setTotalAmount(totalAmount);
+        orderRepository.save(savedOrder);
+
+        // Safely complete or clear the user's active cart without triggering cascade item deletions
+        cartRepository.findByUserIdAndStatus(user.getId(), CartStatus.ACTIVE).ifPresent(cart -> {
+            cart.setStatus(CartStatus.COMPLETED);
+            cartRepository.save(cart);
+        });
+
+        // Send confirmation email
+        sendOrderConfirmationEmail(user);
 
         return mapToResponse(savedOrder);
     }
@@ -90,5 +118,14 @@ public class OrderService {
         res.setDeliveryAddress(order.getDeliveryAddress());
         res.setCreatedAt(order.getCreatedAt());
         return res;
+    }
+
+    private void sendOrderConfirmationEmail(User user) {
+        SimpleMailMessage mail = new SimpleMailMessage();
+        mail.setFrom("Khethukuthulasimamane@gmail.com");
+        mail.setTo(user.getEmail());
+        mail.setSubject("Order Placed Successfully!");
+        mail.setText("Congratulations! Your order with JustShop was placed successfully.");
+        mailSender.send(mail);
     }
 }
