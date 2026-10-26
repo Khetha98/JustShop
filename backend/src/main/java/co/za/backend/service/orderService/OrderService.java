@@ -87,9 +87,8 @@ public class OrderService {
         savedOrder.setTotalAmount(totalAmount);
         orderRepository.save(savedOrder);
 
-        // Clear the user's active cart after successful order creation
+        // Safely complete or clear the user's active cart without triggering cascade item deletions
         cartRepository.findByUserIdAndStatus(user.getId(), CartStatus.ACTIVE).ifPresent(cart -> {
-            cartItemRepository.deleteAll(cart.getItems());
             cart.setStatus(CartStatus.COMPLETED);
             cartRepository.save(cart);
         });

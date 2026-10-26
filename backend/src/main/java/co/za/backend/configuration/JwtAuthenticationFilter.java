@@ -41,33 +41,25 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
             @NonNull HttpServletResponse response,
             @NonNull FilterChain filterChain
     ) throws ServletException, IOException {
-        System.out.println("--- JwtAuthenticationFilter invoked for URL: " + request.getRequestURI() + " ---");
         final String authHeader = request.getHeader("Authorization");
 
         if (authHeader == null || !authHeader.startsWith("Bearer ")) {
-            System.out.println("Bearer extraction failed!!");
             filterChain.doFilter(request, response);
             return;
         }
-        System.out.println("After Bearer check");
         try {
             final String jwt = authHeader.substring(7);
             final String userEmail = jwtService.extractUsername(jwt);
 
             Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
-            System.out.println("After Authentication object");
-            System.out.println(userEmail);
-            System.out.println(authentication);
             if (userEmail != null && authentication == null) {
                 UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
-                System.out.println("Before JWT service");
                 if (jwtService.isTokenValid(jwt, userDetails)) {
                     UsernamePasswordAuthenticationToken authToken = new UsernamePasswordAuthenticationToken(
                             userDetails,
                             null,
                             userDetails.getAuthorities()
                     );
-                    System.out.println("before setting details on authtoken");
                     authToken.setDetails(new WebAuthenticationDetailsSource().buildDetails(request));
                     SecurityContextHolder.getContext().setAuthentication(authToken);
                 }
@@ -75,8 +67,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
             filterChain.doFilter(request, response);
         } catch (Exception exception) {
-            System.out.println("AT CATCH!!! ERROR MESSAGE: " + exception.getMessage());
-            exception.printStackTrace(); // <-- This will print the exact line and reason for failure
+            //System.out.println("AT CATCH!!! ERROR MESSAGE: " + exception.getMessage());
+            //exception.printStackTrace(); // <-- This will print the exact line and reason for failure
             handlerExceptionResolver.resolveException(request, response, null, exception);
         }
     }
