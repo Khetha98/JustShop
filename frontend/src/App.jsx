@@ -5,7 +5,6 @@ import CheckoutPage from './features/store/CheckoutPage.jsx'
 import SignInPage from './features/auth/SignInPage.jsx'
 import SignUpPage from './features/auth/SignUpPage.jsx'
 import { api } from './api/client.js'
-import { products as sampleProducts } from './features/store/products.js'
 
 function App() {
   const path = window.location.pathname.replace(/\/+$/, '') || '/'
@@ -13,7 +12,8 @@ function App() {
   const isBagPage = path === '/bag'
   const isCheckoutPage = path === '/checkout'
   const isSignInPage = path === '/sign-in'
-  const [products, setProducts] = useState(sampleProducts)
+  const [products, setProducts] = useState([])
+  const [isLoadingProducts, setIsLoadingProducts] = useState(true)
   const [catalogError, setCatalogError] = useState('')
   const [cartItems, setCartItems] = useState(() => {
     try {
@@ -38,30 +38,24 @@ function App() {
         }
 
         if (isCurrent) {
-          const productIdsByName = new Map(responseProducts.map((product) => [product.name, product.id]))
-          const legacyProductIds = new Map(sampleProducts.map((product) => [
-            product.id,
-            productIdsByName.get(product.name),
-          ]))
-          setCartItems((items) => items.map((item) => {
-            const migratedId = legacyProductIds.get(item.id)
-            return migratedId === undefined ? item : { ...item, id: migratedId }
-          }))
           setProducts(responseProducts.map((product) => {
-            const sample = sampleProducts.find((item) => item.name === product.name)
             return {
               ...product,
               detail: product.description || product.category || '',
               price: Number(product.price),
-              image: product.imageUrl || sample?.image || '',
+              image: product.imageUrl || '',
               imageAlt: product.description || product.name,
-              color: sample?.color || 'moss',
+              color: 'moss',
             }
           }))
+          setIsLoadingProducts(false)
         }
       })
       .catch((error) => {
-        if (isCurrent) setCatalogError(error.message)
+        if (isCurrent) {
+          setCatalogError(error.message)
+          setIsLoadingProducts(false)
+        }
       })
 
     return () => {
@@ -81,9 +75,17 @@ function App() {
             : 'Create your account | JustShop'
   }, [isHomePage, isBagPage, isCheckoutPage, isSignInPage])
 
-  if (isHomePage) return <HomePage cartItems={cartItems} setCartItems={setCartItems} products={products} catalogError={catalogError} />
+  if (isHomePage) return <HomePage cartItems={cartItems} setCartItems={setCartItems} products={products} isLoadingProducts={isLoadingProducts} catalogError={catalogError} />
   if (isBagPage) return <BagPage cartItems={cartItems} setCartItems={setCartItems} products={products} />
-  if (isCheckoutPage) return <CheckoutPage cartItems={cartItems} setCartItems={setCartItems} products={products} />
+  if (isCheckoutPage) return (
+    <CheckoutPage
+      cartItems={cartItems}
+      setCartItems={setCartItems}
+      products={products}
+      isLoadingProducts={isLoadingProducts}
+      catalogError={catalogError}
+    />
+  )
   return isSignInPage ? <SignInPage /> : <SignUpPage />
 }
 

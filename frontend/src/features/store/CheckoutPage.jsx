@@ -4,7 +4,7 @@ import { formatPrice } from './products.js'
 import { api, getAuthToken } from '../../api/client.js'
 import './CheckoutPage.css'
 
-function CheckoutPage({ cartItems, setCartItems, products }) {
+function CheckoutPage({ cartItems, setCartItems, products, isLoadingProducts, catalogError }) {
   const [order, setOrder] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
@@ -12,6 +12,13 @@ function CheckoutPage({ cartItems, setCartItems, products }) {
   const checkoutItems = cartItems
     .map((item) => ({ ...item, product: products.find((product) => String(product.id) === String(item.id)) }))
     .filter((item) => item.product)
+  const hasUnavailableItems = checkoutItems.length !== cartItems.length
+  const hasInvalidItems = checkoutItems.some(({ product, quantity }) => (
+    !Number.isSafeInteger(Number(product.id))
+    || Number(product.id) <= 0
+    || !Number.isSafeInteger(quantity)
+    || quantity <= 0
+  ))
   const itemCount = checkoutItems.reduce((count, item) => count + item.quantity, 0)
   const subtotal = checkoutItems.reduce((total, item) => total + item.product.price * item.quantity, 0)
 
@@ -22,8 +29,8 @@ function CheckoutPage({ cartItems, setCartItems, products }) {
     setError('')
 
     try {
-      if (checkoutItems.some(({ product }) => !Number.isSafeInteger(Number(product.id)))) {
-        throw new Error('Your bag contains sample products that are not in the backend catalog.')
+      if (hasUnavailableItems || hasInvalidItems) {
+        throw new Error('Your bag contains an unavailable or invalid product. Update your bag before placing the order.')
       }
 
       const response = await api.checkout({
@@ -44,6 +51,10 @@ function CheckoutPage({ cartItems, setCartItems, products }) {
           quantity,
         })),
       })
+      if (!response || typeof response !== 'object' || response.id == null) {
+        throw new Error('The backend returned an invalid order response.')
+      }
+
       setOrder(response)
       setCartItems([])
     } catch (requestError) {
@@ -63,12 +74,7 @@ function CheckoutPage({ cartItems, setCartItems, products }) {
           <a href="/bag">← Back to your bag</a>
         </div>
 
-        {checkoutItems.length === 0 ? (
-          <div className="checkout-empty">
-            <p>Your bag is empty.</p>
-            <a className="checkout-submit" href="/#shop">Explore the collection</a>
-          </div>
-        ) : order ? (
+        {order ? (
           <section className="checkout-confirmation" role="status" aria-live="polite">
             <span className="confirmation-mark" aria-hidden="true">✓</span>
             <p className="store-eyebrow">ORDER RECEIVED</p>
@@ -76,6 +82,25 @@ function CheckoutPage({ cartItems, setCartItems, products }) {
             <p>Order #{order.id} was created with status {order.orderStatus}. Payment has not been processed.</p>
             <a className="checkout-submit" href="/">Continue shopping</a>
           </section>
+        ) : isLoadingProducts ? (
+          <div className="checkout-empty" role="status">
+            <p>Loading your bag…</p>
+          </div>
+        ) : catalogError ? (
+          <div className="checkout-empty" role="alert">
+            <p>Could not load product details: {catalogError}</p>
+            <a className="checkout-submit" href="/bag">Return to your bag</a>
+          </div>
+        ) : checkoutItems.length === 0 ? (
+          <div className="checkout-empty">
+            <p>Your bag is empty.</p>
+            <a className="checkout-submit" href="/#shop">Explore the collection</a>
+          </div>
+        ) : hasUnavailableItems || hasInvalidItems ? (
+          <div className="checkout-empty" role="alert">
+            <p>Your bag contains products that can’t be checked out.</p>
+            <a className="checkout-submit" href="/bag">Review your bag</a>
+          </div>
         ) : !isSignedIn ? (
           <section className="checkout-empty">
             <p>Sign in to place your order.</p>
@@ -152,7 +177,11 @@ function CheckoutPage({ cartItems, setCartItems, products }) {
                 <strong>Payment</strong>
                 <p>Payment is not available in this preview. No card details will be requested.</p>
               </div>
-              <button className="checkout-submit" type="submit" disabled={isSubmitting}>
+              <button
+                className="checkout-submit"
+                type="submit"
+                disabled={isSubmitting || hasUnavailableItems || hasInvalidItems}
+              >
                 {isSubmitting ? 'Placing order…' : 'Place order'} <span aria-hidden="true">→</span>
               </button>
             </form>
