@@ -47,9 +47,6 @@ public class SecurityConfiguration {
                 .authorizeHttpRequests(auth -> auth
                         .requestMatchers("/api/auth/**").permitAll()
                         .requestMatchers("/api/products/**").permitAll()
-                        .requestMatchers("/api/cart/**").authenticated()   //
-                        .requestMatchers("/api/orders/**").authenticated() // Ensure order endpoints require authentication
-                        .requestMatchers("/api/orders/**").authenticated() // Ensure order endpoints require authentication
                         .requestMatchers("/admin/**").hasRole("SUPER_ADMIN")
                         .anyRequest().authenticated()
                 )
