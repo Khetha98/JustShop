@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { api, saveAuthToken } from '../../api/client.js'
+import { api, saveAuthToken, saveAuthUserName } from '../../api/client.js'
 import './SignUpPage.css'
 
 function SignUpPage() {
@@ -24,6 +24,7 @@ function SignUpPage() {
       await api.register(credentials)
       const loginResponse = await api.login(credentials)
       saveAuthToken(loginResponse.token)
+      saveAuthUserName(loginResponse.fullName)
       window.location.assign('/')
     } catch (requestError) {
       setError(requestError.message)

@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import StoreHeader from './StoreHeader.jsx'
 import { formatPrice } from './products.js'
+import { getAuthUserName } from '../../api/client.js'
 import './HomePage.css'
 
 function HomePage({ cartItems, setCartItems, products, isLoadingProducts, catalogError }) {
@@ -19,7 +20,7 @@ function HomePage({ cartItems, setCartItems, products, isLoadingProducts, catalo
 
   return (
     <main className="storefront">
-      <StoreHeader bagCount={bagCount} />
+      <StoreHeader bagCount={bagCount} userName={getAuthUserName()} />
 
       <section className="store-intro" id="story">
         <div className="intro-copy">

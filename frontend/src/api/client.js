@@ -1,5 +1,6 @@
 const API_BASE_URL = (import.meta.env.VITE_API_BASE_URL || '/api').replace(/\/+$/, '')
 const TOKEN_KEY = 'justshop-token'
+const USER_NAME_KEY = 'justshop-user-name'
 
 export class ApiError extends Error {
   constructor(message, status) {
@@ -15,6 +16,14 @@ export function getAuthToken() {
 
 export function saveAuthToken(token) {
   window.localStorage.setItem(TOKEN_KEY, token)
+}
+
+export function getAuthUserName() {
+  return window.localStorage.getItem(USER_NAME_KEY)
+}
+
+export function saveAuthUserName(fullName) {
+  window.localStorage.setItem(USER_NAME_KEY, fullName)
 }
 
 async function request(path, { body, ...options } = {}) {

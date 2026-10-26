@@ -1,11 +1,10 @@
 import { useState } from 'react'
-import { api, saveAuthToken } from '../../api/client.js'
+import { api, saveAuthToken, saveAuthUserName } from '../../api/client.js'
 import './SignUpPage.css'
 import './SignInPage.css'
 
 function SignInPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const returnTo = new URLSearchParams(window.location.search).get('returnTo')
@@ -23,9 +22,11 @@ function SignInPage() {
         password: formData.get('password'),
       })
       saveAuthToken(response.token)
-      setSubmitted(true)
+      saveAuthUserName(response.fullName)
       if (returnTo?.startsWith('/') && !returnTo.startsWith('//')) {
         window.location.assign(returnTo)
+      } else {
+        window.location.assign('/')
       }
     } catch (requestError) {
       setError(requestError.message)
@@ -61,54 +62,44 @@ function SignInPage() {
           <h1>Welcome back</h1>
           <p className="form-intro">Sign in to pick up where you left off.</p>
 
-          {submitted ? (
-            <div className="success-message" role="status">
-              <span className="success-mark" aria-hidden="true">✓</span>
-              <div>
-                <h2>Welcome back.</h2>
-                <p>Your JustShop account is ready.</p>
-              </div>
-            </div>
-          ) : (
-            <form className="signup-form" onSubmit={handleSubmit}>
-              {error && <p className="form-error" role="alert">{error}</p>}
-              <label htmlFor="email">Email address</label>
+          <form className="signup-form" onSubmit={handleSubmit}>
+            {error && <p className="form-error" role="alert">{error}</p>}
+            <label htmlFor="email">Email address</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              required
+            />
+
+            <label htmlFor="password">Password</label>
+            <div className="password-field">
               <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="current-password"
+                placeholder="Your password"
                 required
               />
-
-              <label htmlFor="password">Password</label>
-              <div className="password-field">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="current-password"
-                  placeholder="Your password"
-                  required
-                />
-                <button
-                  className="password-toggle"
-                  type="button"
-                  onClick={() => setShowPassword((visible) => !visible)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-
-              <a className="forgot-password" href="#forgot-password">Forgot password?</a>
-
-              <button className="create-account-button" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Signing in…' : 'Sign in'} <span aria-hidden="true">→</span>
+              <button
+                className="password-toggle"
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? 'Hide' : 'Show'}
               </button>
-            </form>
-          )}
+            </div>
+
+            <a className="forgot-password" href="#forgot-password">Forgot password?</a>
+
+            <button className="create-account-button" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Signing in…' : 'Sign in'} <span aria-hidden="true">→</span>
+            </button>
+          </form>
 
           <p className="form-footnote">Your JustShop account, all in one place.</p>
         </div>

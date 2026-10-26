@@ -61,6 +61,13 @@
   gap: 23px;
 }
 
+.account-name {
+  max-width: clamp(100px, 20vw, 220px);
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .bag-count {
   display: flex;
   align-items: center;
