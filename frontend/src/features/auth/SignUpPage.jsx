@@ -4,8 +4,6 @@ import './SignUpPage.css'
 
 function SignUpPage() {
   const [showPassword, setShowPassword] = useState(false)
-  const [submitted, setSubmitted] = useState(false)
-  const [fullName, setFullName] = useState('')
   const [isSubmitting, setIsSubmitting] = useState(false)
   const [error, setError] = useState('')
   const returnTo = new URLSearchParams(window.location.search).get('returnTo')
@@ -26,11 +24,7 @@ function SignUpPage() {
       await api.register(credentials)
       const loginResponse = await api.login(credentials)
       saveAuthToken(loginResponse.token)
-      setFullName(credentials.fullName)
-      setSubmitted(true)
-      if (returnTo?.startsWith('/') && !returnTo.startsWith('//')) {
-        window.location.assign(returnTo)
-      }
+      window.location.assign('/')
     } catch (requestError) {
       setError(requestError.message)
     } finally {
@@ -65,69 +59,59 @@ function SignUpPage() {
           <h1>Create your account</h1>
           <p className="form-intro">Join us for considered finds and little things worth keeping.</p>
 
-          {submitted ? (
-            <div className="success-message" role="status">
-              <span className="success-mark" aria-hidden="true">✓</span>
-              <div>
-                <h2>You're in, {fullName.split(' ')[0]}.</h2>
-                <p>Your JustShop account is ready for its first good find.</p>
-              </div>
-            </div>
-          ) : (
-            <form className="signup-form" onSubmit={handleSubmit}>
-              {error && <p className="form-error" role="alert">{error}</p>}
-              <label htmlFor="full-name">Full name</label>
+          <form className="signup-form" onSubmit={handleSubmit}>
+            {error && <p className="form-error" role="alert">{error}</p>}
+            <label htmlFor="full-name">Full name</label>
+            <input
+              id="full-name"
+              name="name"
+              type="text"
+              autoComplete="name"
+              placeholder="Your name"
+              required
+            />
+
+            <label htmlFor="email">Email address</label>
+            <input
+              id="email"
+              name="email"
+              type="email"
+              autoComplete="email"
+              placeholder="you@example.com"
+              required
+            />
+
+            <label htmlFor="password">Password</label>
+            <div className="password-field">
               <input
-                id="full-name"
-                name="name"
-                type="text"
-                autoComplete="name"
-                placeholder="Your name"
+                id="password"
+                name="password"
+                type={showPassword ? 'text' : 'password'}
+                autoComplete="new-password"
+                placeholder="At least 8 characters"
+                minLength={8}
                 required
               />
-
-              <label htmlFor="email">Email address</label>
-              <input
-                id="email"
-                name="email"
-                type="email"
-                autoComplete="email"
-                placeholder="you@example.com"
-                required
-              />
-
-              <label htmlFor="password">Password</label>
-              <div className="password-field">
-                <input
-                  id="password"
-                  name="password"
-                  type={showPassword ? 'text' : 'password'}
-                  autoComplete="new-password"
-                  placeholder="At least 8 characters"
-                  minLength={8}
-                  required
-                />
-                <button
-                  className="password-toggle"
-                  type="button"
-                  onClick={() => setShowPassword((visible) => !visible)}
-                  aria-label={showPassword ? 'Hide password' : 'Show password'}
-                >
-                  {showPassword ? 'Hide' : 'Show'}
-                </button>
-              </div>
-              <p className="password-hint">Use at least 8 characters.</p>
-
-              <label className="terms-check">
-                <input type="checkbox" required />
-                <span>I agree to the <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.</span>
-              </label>
-
-              <button className="create-account-button" type="submit" disabled={isSubmitting}>
-                {isSubmitting ? 'Creating account…' : 'Create account'} <span aria-hidden="true">→</span>
+              <button
+                className="password-toggle"
+                type="button"
+                onClick={() => setShowPassword((visible) => !visible)}
+                aria-label={showPassword ? 'Hide password' : 'Show password'}
+              >
+                {showPassword ? 'Hide' : 'Show'}
               </button>
-            </form>
-          )}
+            </div>
+            <p className="password-hint">Use at least 8 characters.</p>
+
+            <label className="terms-check">
+              <input type="checkbox" required />
+              <span>I agree to the <a href="#terms">Terms of Service</a> and <a href="#privacy">Privacy Policy</a>.</span>
+            </label>
+
+            <button className="create-account-button" type="submit" disabled={isSubmitting}>
+              {isSubmitting ? 'Creating account…' : 'Create account'} <span aria-hidden="true">→</span>
+            </button>
+          </form>
 
           <p className="form-footnote">Your email helps us manage your account. See our Privacy Policy for details.</p>
         </div>
